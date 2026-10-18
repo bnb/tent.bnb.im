@@ -1,0 +1,875 @@
+{
+  "$schema": "./atproto.schema.json",
+  "annotations": [
+    {
+      "page": "about.html",
+      "heading": "how-it-works",
+      "summary": "In atproto the same exchange runs through aggregators. App 1 writes a record to user A's PDS, the PDS emits it on its event stream, a relay merges that into the firehose, and an AppView indexes it so user B's app can read it. A's PDS never sends the post to B's PDS the way a Tent server would.",
+      "links": [
+        {
+          "title": "Protocol overview",
+          "url": "https://atproto.com/guides/overview#network-architecture"
+        },
+        {
+          "title": "The AT stack",
+          "url": "https://atproto.com/guides/the-at-stack"
+        },
+        {
+          "title": "Sync spec",
+          "url": "https://atproto.com/specs/sync"
+        }
+      ]
+    },
+    {
+      "page": "about.html",
+      "heading": "what39s-special-about-tent",
+      "summary": "atproto shares these goals and handles migration with a different kind of identifier. Tent entities are URLs, so moving to a new URL means every relationship has to rewrite its copies of your posts with `original_entity`. An atproto account is a DID that stays the same when you change PDS or handle, so follows and references to you need no updating.",
+      "links": [
+        {
+          "title": "DID spec",
+          "url": "https://atproto.com/specs/did"
+        },
+        {
+          "title": "Account migration",
+          "url": "https://atproto.com/specs/account#pds-account-migration"
+        },
+        {
+          "title": "Identity guide",
+          "url": "https://atproto.com/guides/identity"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "concepts",
+      "summary": "Tent's API maps to [XRPC](https://atproto.com/specs/xrpc). Tent servers advertise endpoint URL templates in the meta post, while XRPC endpoints live at fixed paths (`/xrpc/<NSID>`) with request and response shapes defined in Lexicon, so every PDS exposes the same paths.",
+      "links": [
+        {
+          "title": "XRPC spec",
+          "url": "https://atproto.com/specs/xrpc"
+        },
+        {
+          "title": "Lexicon guide",
+          "url": "https://atproto.com/guides/lexicon#http-api-methods"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "pagination",
+      "summary": "XRPC list endpoints paginate with an opaque `cursor`. A response includes a cursor while more results exist, and the client sends it back with the same parameters to get the next batch. There are no first, prev or last links like Tent's `pages` object.",
+      "links": [
+        {
+          "title": "XRPC pagination",
+          "url": "https://atproto.com/specs/xrpc#cursors-and-pagination"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "newpost",
+      "summary": "The counterpart is `com.atproto.repo.createRecord` on the user's PDS. The client names the repo and collection and may supply the record key (otherwise one is generated), and the response returns the new record's at:// URI and CID.",
+      "links": [
+        {
+          "title": "Writing data",
+          "url": "https://atproto.com/guides/writing-data"
+        },
+        {
+          "title": "Posting via the API",
+          "url": "https://atproto.com/blog/create-post"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "postsfeed",
+      "summary": "A PDS has no cross-account feed query. `com.atproto.repo.listRecords` lists one collection in one repository. Feeds across many accounts, filtered by type or by mention, come from AppViews and custom feed generators that index the firehose.",
+      "links": [
+        {
+          "title": "Reading data",
+          "url": "https://atproto.com/guides/reading-data"
+        },
+        {
+          "title": "Feeds guide",
+          "url": "https://atproto.com/guides/feeds"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "mentions",
+      "summary": "Listing the posts that mention a post is a backlinks query in atproto. There's no core endpoint for it: AppViews answer it for the record types they index, and community indexes such as Microcosm's Constellation answer it for any record.",
+      "links": [
+        {
+          "title": "Backlinks",
+          "url": "https://atproto.com/guides/social-graph#backlinks"
+        }
+      ]
+    },
+    {
+      "page": "docs/api.html",
+      "heading": "attachment",
+      "summary": "Fetching an attachment by digest corresponds to `com.atproto.sync.getBlob`, which takes the account DID and the blob's CID and returns the original file. Apps usually serve resized copies from their own CDN instead of linking to the PDS.",
+      "links": [
+        {
+          "title": "Blob upload and download",
+          "url": "https://atproto.com/specs/xrpc#blob-upload-and-download"
+        },
+        {
+          "title": "Blob spec",
+          "url": "https://atproto.com/specs/blob"
+        }
+      ]
+    },
+    {
+      "page": "docs/apps.html",
+      "heading": "discovery",
+      "summary": "atproto OAuth starts the same way. The user enters a handle or DID, the client resolves it to the DID document to find the PDS, then reads the PDS's `/.well-known/oauth-protected-resource` metadata to find its authorization server. The client must confirm that server is authoritative for the DID before trusting the login.",
+      "links": [
+        {
+          "title": "OAuth identity authentication",
+          "url": "https://atproto.com/specs/oauth#identity-authentication"
+        },
+        {
+          "title": "Handle resolution",
+          "url": "https://atproto.com/specs/handle#handle-resolution"
+        }
+      ]
+    },
+    {
+      "page": "docs/apps.html",
+      "heading": "registration",
+      "summary": "atproto drops per-server registration. An app's `client_id` is an HTTPS URL pointing at a public client metadata document (with fields like `redirect_uris`, `scope` and `client_name`), which any authorization server fetches on demand, and there is no client secret. Tent apps instead register by creating an app post on each user's server and get credentials back.",
+      "links": [
+        {
+          "title": "Client metadata",
+          "url": "https://atproto.com/specs/oauth#client-id-metadata-document"
+        }
+      ]
+    },
+    {
+      "page": "docs/apps.html",
+      "heading": "oauth",
+      "summary": "Both support only the OAuth 2.0 authorization code grant. atproto's profile builds on OAuth 2.1 and also requires PKCE, pushed authorization requests (PAR) and DPoP, and the code is exchanged for DPoP-bound access and refresh tokens instead of Hawk credentials.",
+      "links": [
+        {
+          "title": "OAuth spec",
+          "url": "https://atproto.com/specs/oauth"
+        },
+        {
+          "title": "OAuth patterns",
+          "url": "https://atproto.com/guides/oauth-patterns"
+        }
+      ]
+    },
+    {
+      "page": "docs/apps.html",
+      "heading": "notifications",
+      "summary": "A PDS doesn't push posts to registered apps. Apps that need updates subscribe to an event stream instead: the firehose or Jetstream over WebSocket, or [Tap](https://atproto.com/guides/the-at-stack#tap), which handles backfill and can deliver filtered events to a webhook. That last option is the closest match to Tent's `notification_url`.",
+      "links": [
+        {
+          "title": "Tap",
+          "url": "https://atproto.com/guides/the-at-stack#tap"
+        },
+        {
+          "title": "Streaming data",
+          "url": "https://atproto.com/guides/streaming-data"
+        }
+      ]
+    },
+    {
+      "page": "docs/authentication.html",
+      "heading": "hawk",
+      "summary": "The closest atproto counterpart is DPoP, which atproto's OAuth profile requires. The client signs a fresh proof JWT for every request with its own keypair, which binds the access token to that client; Hawk gets a similar per-request guarantee from an HMAC over a shared secret. For server-to-server calls, which Tent also signs with Hawk, atproto uses short-lived inter-service JWTs signed with the account's signing key.",
+      "links": [
+        {
+          "title": "DPoP",
+          "url": "https://atproto.com/specs/oauth#demonstrating-proof-of-possession-d-po-p"
+        },
+        {
+          "title": "Inter-service auth",
+          "url": "https://atproto.com/specs/xrpc#inter-service-authentication-jwt"
+        }
+      ]
+    },
+    {
+      "page": "docs/authentication.html",
+      "heading": "timestamp-skew",
+      "summary": "Loosely comparable to DPoP's server-issued nonces. The server sends a `DPoP-Nonce` header, rotates it at least every 5 minutes, and clients track the current nonce and retry when a request fails because it changed, much as a Tent client adopts the server timestamp from `WWW-Authenticate`.",
+      "links": [
+        {
+          "title": "DPoP",
+          "url": "https://atproto.com/specs/oauth#demonstrating-proof-of-possession-d-po-p"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "entities",
+      "summary": "The closest atproto concept is an account identity: a permanent [DID](https://atproto.com/specs/did) (like `did:plc:ewvi7nxzyoun6zhxrhs64oiz`) plus a [handle](https://atproto.com/specs/handle) that is a DNS name. Tent uses one URL as both the identifier and the discovery address. atproto keeps the DID as the canonical id and treats the handle as a changeable name that resolves to it.",
+      "links": [
+        {
+          "title": "Identity guide",
+          "url": "https://atproto.com/guides/identity"
+        },
+        {
+          "title": "DID spec",
+          "url": "https://atproto.com/specs/did"
+        },
+        {
+          "title": "Handle spec",
+          "url": "https://atproto.com/specs/handle"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "servers",
+      "summary": "Tent servers correspond to Personal Data Servers (PDS), which store an account's repository and serve it to the network. A Tent meta post can list several servers ranked by preference, while an atproto DID document names a single PDS endpoint (`#atproto_pds`).",
+      "links": [
+        {
+          "title": "Account hosting spec",
+          "url": "https://atproto.com/specs/account"
+        },
+        {
+          "title": "DID documents",
+          "url": "https://atproto.com/specs/did#did-documents"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "posts",
+      "summary": "Posts map to records: JSON objects stored in the account's [repository](https://atproto.com/specs/repository) under a collection named by an NSID. Records hold whatever structured data an app defines, such as posts, likes, follows and profiles. One big difference is that the whole repository is public, while Tent posts can be private.",
+      "links": [
+        {
+          "title": "Data repositories",
+          "url": "https://atproto.com/guides/data-repos"
+        },
+        {
+          "title": "Repository spec",
+          "url": "https://atproto.com/specs/repository"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "apps",
+      "summary": "Apps are OAuth clients. As in Tent, a user authorizes an app against their own server using the OAuth authorization code flow. atproto identifies each app by a URL to its public client metadata and requires DPoP-bound tokens.",
+      "links": [
+        {
+          "title": "OAuth spec",
+          "url": "https://atproto.com/specs/oauth"
+        },
+        {
+          "title": "About OAuth",
+          "url": "https://atproto.com/guides/about-oauth"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "relationships",
+      "summary": "atproto has no pairwise relationship handshake. Tent uses relationships so a receiving server can trust who published a post, while in atproto every repository commit is signed with the key listed in the account's DID document, so anyone can verify a record no matter where they got it. Public records also have no per-reader permissions to scope.",
+      "links": [
+        {
+          "title": "Commit objects",
+          "url": "https://atproto.com/specs/repository#commit-objects"
+        },
+        {
+          "title": "Cryptography spec",
+          "url": "https://atproto.com/specs/cryptography"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "subscriptions",
+      "summary": "Following someone in atproto means writing a follow record (in Bluesky, `app.bsky.graph.follow`) to your own repository, and that record triggers no delivery. Relays aggregate every PDS's event stream into a firehose and AppViews build timelines from it, so the publisher's server never pushes to subscribers as a Tent server does.",
+      "links": [
+        {
+          "title": "Social graph",
+          "url": "https://atproto.com/guides/social-graph"
+        },
+        {
+          "title": "Relays",
+          "url": "https://atproto.com/guides/the-at-stack#relays"
+        },
+        {
+          "title": "Streaming data",
+          "url": "https://atproto.com/guides/streaming-data"
+        }
+      ]
+    },
+    {
+      "page": "docs/index.html",
+      "heading": "notifications",
+      "summary": "atproto has no webhooks between users' servers. Notifications such as mentions and replies are computed by AppViews from what they see on the firehose.",
+      "links": [
+        {
+          "title": "App views",
+          "url": "https://atproto.com/guides/the-at-stack#app-views"
+        },
+        {
+          "title": "Streaming data",
+          "url": "https://atproto.com/guides/streaming-data"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "protocol-posts",
+      "summary": "atproto keeps most protocol state outside the repository. Identity and hosting location live in the DID document, and app authorizations live in the PDS's OAuth sessions. The `com.atproto.*` Lexicons are the nearest thing to Tent's protocol post types, though they mostly define API endpoints.",
+      "links": [
+        {
+          "title": "Protocol structure",
+          "url": "https://atproto.com/specs/atp#protocol-structure"
+        },
+        {
+          "title": "DID spec",
+          "url": "https://atproto.com/specs/did"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "meta",
+      "summary": "The meta post corresponds to the [DID document](https://atproto.com/specs/did#did-documents). Both say where the account is hosted and are found through discovery, and the DID document also carries the account's public signing key and its handle (`alsoKnownAs`). Changing a handle is an edit to this document and leaves records untouched; profile fields live in an ordinary profile record instead.",
+      "links": [
+        {
+          "title": "DID documents",
+          "url": "https://atproto.com/specs/did#did-documents"
+        },
+        {
+          "title": "Identity guide",
+          "url": "https://atproto.com/guides/identity"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "delete",
+      "summary": "atproto deletes records outright. The repository keeps no tombstone of the old contents, and the deletion appears as a delete operation in the next commit on the firehose. Tent instead publishes a delete post that refs what was removed.",
+      "links": [
+        {
+          "title": "Deleting records",
+          "url": "https://atproto.com/guides/writing-data#deleting-records"
+        },
+        {
+          "title": "Repository spec",
+          "url": "https://atproto.com/specs/repository"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "app-authorization",
+      "summary": "The matching atproto concept is the set of [permission](https://atproto.com/specs/permission) scopes granted during OAuth, such as `repo:app.example.profile` for one record collection, often bundled into permission sets. Write access is scoped per collection like Tent's `types.write`. There is no read scope for repository data because it is all public.",
+      "links": [
+        {
+          "title": "Permission spec",
+          "url": "https://atproto.com/specs/permission"
+        },
+        {
+          "title": "Permission sets",
+          "url": "https://atproto.com/guides/permission-sets"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "status",
+      "summary": "The Bluesky counterpart is the `app.bsky.feed.post` record: short text, a required `createdAt`, and optional facets, embeds and reply references. It's an app-level Lexicon defined by Bluesky, outside atproto's core, much as status sat outside Tent's required protocol posts.",
+      "links": [
+        {
+          "title": "Posting via the API",
+          "url": "https://atproto.com/blog/create-post"
+        },
+        {
+          "title": "Writing data",
+          "url": "https://atproto.com/guides/writing-data"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "reply-fragment",
+      "summary": "Bluesky marks replies with a `reply` field on the post instead of a type fragment. It holds two strong refs (at:// URI plus CID): the immediate `parent` and the thread's `root`.",
+      "links": [
+        {
+          "title": "Replies",
+          "url": "https://atproto.com/blog/create-post#replies"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "inline-mention",
+      "summary": "Bluesky's equivalent is a mention facet: a byte range in the post text tagged with the mentioned account's DID (`app.bsky.richtext.facet#mention`). Tent points into the `mentions` array by index, while facets carry the DID directly and use UTF-8 byte offsets. Bluesky also uses facets for links in place of a Markdown dialect.",
+      "links": [
+        {
+          "title": "Mentions and links",
+          "url": "https://atproto.com/blog/create-post#mentions-and-links"
+        },
+        {
+          "title": "Lexicon style guide",
+          "url": "https://atproto.com/guides/lexicon-style-guide"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "counting-characters",
+      "summary": "Lexicon string fields can cap length two ways: `maxLength` counts UTF-8 bytes and `maxGraphemes` counts grapheme clusters, which roughly match visible characters, emoji included. Tent counts code points instead. The Lexicon style guide recommends a grapheme limit plus a byte limit for text people type.",
+      "links": [
+        {
+          "title": "Lexicon string type",
+          "url": "https://atproto.com/specs/lexicon#string"
+        },
+        {
+          "title": "Lexicon style guide",
+          "url": "https://atproto.com/guides/lexicon-style-guide"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "repost",
+      "summary": "Bluesky writes a repost as an `app.bsky.feed.repost` record in the reposter's own repository, holding the original post's at:// URI and CID. Tent's repost also needs a mention and copies the original's type into its fragment. Repost counts come from AppViews, the same way like counts do.",
+      "links": [
+        {
+          "title": "Reposting a post",
+          "url": "https://docs.bsky.app/docs/tutorials/like-repost#reposting-a-post"
+        },
+        {
+          "title": "Strong refs",
+          "url": "https://atproto.com/guides/data-repos"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "photo",
+      "summary": "Bluesky attaches photos to an ordinary post with an `app.bsky.embed.images` embed instead of a separate post type. Each image is a blob uploaded to the PDS first, then referenced from the post along with required alt text.",
+      "links": [
+        {
+          "title": "Image embeds",
+          "url": "https://atproto.com/blog/create-post#images-embeds"
+        },
+        {
+          "title": "Blob spec",
+          "url": "https://atproto.com/specs/blob"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "album",
+      "summary": "Loosely, one Bluesky post can carry up to four images in a single `app.bsky.embed.images` embed. There's no record that groups photos already posted elsewhere, which is what a Tent album does with its refs.",
+      "links": [
+        {
+          "title": "Image embeds",
+          "url": "https://docs.bsky.app/docs/advanced-guides/posts#images-embeds"
+        },
+        {
+          "title": "Blob spec",
+          "url": "https://atproto.com/specs/blob"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "essay",
+      "summary": "The closest atproto equivalent is Standard.site's `site.standard.document` record, a shared Lexicon for long-form publishing. Any indexer can pick these records up from the firehose, and a site points back to the record with an HTML `<link>` tag, a pattern close to Tent's discovery link.",
+      "links": [
+        {
+          "title": "Indexing Standard.site",
+          "url": "https://atproto.com/blog/indexing-standard-site"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "tag",
+      "summary": "Bluesky hashtags are tag facets (`app.bsky.richtext.facet#tag`) on a range of post text, carrying the tag string itself. Tent makes a tag its own post that other posts mention, while in Bluesky nothing exists for a hashtag beyond the posts that use it.",
+      "links": [
+        {
+          "title": "Rich text facets",
+          "url": "https://docs.bsky.app/docs/advanced-guides/post-richtext#rich-text-facets"
+        }
+      ]
+    },
+    {
+      "page": "docs/post-types.html",
+      "heading": "favorite",
+      "summary": "Bluesky models this as a like record (`app.bsky.feed.like`) in the liker's own repository, pointing at the liked post with a strong ref. Like counts come from AppViews that index these records across the network.",
+      "links": [
+        {
+          "title": "Lexicon guide",
+          "url": "https://atproto.com/guides/lexicon"
+        },
+        {
+          "title": "Backlinks",
+          "url": "https://atproto.com/guides/social-graph#backlinks"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "id",
+      "summary": "The closest match is the record key (rkey). A record is addressed by DID, collection NSID and rkey together, where Tent uses entity plus `id`. Rkeys are usually [TIDs](https://atproto.com/specs/tid), timestamp-based ids generated by the client or PDS, and are only unique within one collection.",
+      "links": [
+        {
+          "title": "Record key spec",
+          "url": "https://atproto.com/specs/record-key"
+        },
+        {
+          "title": "TID spec",
+          "url": "https://atproto.com/specs/tid"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "type",
+      "summary": "Post types correspond to Lexicon schemas named by [NSIDs](https://atproto.com/specs/nsid) such as `app.bsky.feed.post`, recorded in each record's `$type` field. Both name types under a domain the author controls, but NSID authority is checked through DNS and a breaking change needs a new NSID, where Tent bumps the version in the type URI (`/v0`). Tent's fragment subtypes have no record-level equivalent.",
+      "links": [
+        {
+          "title": "Lexicon authority",
+          "url": "https://atproto.com/specs/lexicon#authority-and-control"
+        },
+        {
+          "title": "NSID spec",
+          "url": "https://atproto.com/specs/nsid"
+        },
+        {
+          "title": "Lexicon guide",
+          "url": "https://atproto.com/guides/lexicon"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "versions",
+      "summary": "atproto keeps history at the repository level. Each change produces a signed commit over the whole repo, and a record's CID (a content hash, like Tent's version ID) identifies one specific version of it. There is no per-record parent graph: updating a record replaces it, and old versions aren't kept.",
+      "links": [
+        {
+          "title": "Commit objects",
+          "url": "https://atproto.com/specs/repository#commit-objects"
+        },
+        {
+          "title": "Updating records",
+          "url": "https://atproto.com/guides/writing-data#updating-records"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "timestamps",
+      "summary": "atproto has no protocol-level timestamps on records. Lexicons define their own, such as the `createdAt` [datetime](https://atproto.com/specs/lexicon#datetime) string on Bluesky posts. TID record keys also encode a time, but the writer picks the key, so it shouldn't be trusted as a timestamp.",
+      "links": [
+        {
+          "title": "Lexicon datetime",
+          "url": "https://atproto.com/specs/lexicon#datetime"
+        },
+        {
+          "title": "TID spec",
+          "url": "https://atproto.com/specs/tid"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "permissions",
+      "summary": "Everything in an atproto repository is public, so records have no permission list. Non-public data is the job of the newer Spaces extension (alpha since August 2026), where a space authority decides which DIDs can read the records in a space. Like Tent permissions, that is access control without encryption.",
+      "links": [
+        {
+          "title": "Spaces alpha",
+          "url": "https://atproto.com/blog/atproto-spaces-alpha"
+        },
+        {
+          "title": "What is missing",
+          "url": "https://atproto.com/specs/atp#what-is-missing"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "mentions",
+      "summary": "Records link to accounts by DID and to other records by at:// URI, and Bluesky marks mentions in post text as rich-text facets carrying the mentioned DID. The author's server sends no notification; AppViews notice the reference on the firehose. Tent's private mentions have no counterpart.",
+      "links": [
+        {
+          "title": "Mentions and links",
+          "url": "https://atproto.com/blog/create-post#mentions-and-links"
+        },
+        {
+          "title": "Backlinks",
+          "url": "https://atproto.com/guides/social-graph#backlinks"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "refs",
+      "summary": "The counterpart is a strong reference (`com.atproto.repo.strongRef`): an at:// URI plus the CID of the exact record version. Bluesky uses these for quote posts and replies, and AppViews hydrate the referenced records into the same response, much like Tent's `max_refs`.",
+      "links": [
+        {
+          "title": "AT URI spec",
+          "url": "https://atproto.com/specs/at-uri-scheme"
+        },
+        {
+          "title": "Quote posts",
+          "url": "https://atproto.com/blog/create-post#quote-posts"
+        },
+        {
+          "title": "Lexicon style guide",
+          "url": "https://atproto.com/guides/lexicon-style-guide"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "attachments",
+      "summary": "Attachments map to [blobs](https://atproto.com/specs/blob): files stored on the PDS next to the repository and referenced from records by a CID (SHA-256, where Tent uses SHA-512 truncated to 256 bits). A blob is uploaded first with `com.atproto.repo.uploadBlob` and then referenced, while Tent uploads files in the same multipart request as the post. Tent's name-based content negotiation has no equivalent.",
+      "links": [
+        {
+          "title": "Blob spec",
+          "url": "https://atproto.com/specs/blob"
+        },
+        {
+          "title": "Images and video",
+          "url": "https://atproto.com/guides/images-and-video"
+        }
+      ]
+    },
+    {
+      "page": "docs/posts.html",
+      "heading": "canonical-post-json",
+      "summary": "atproto solves the same repeatable-hash problem with DRISL-CBOR, a deterministic CBOR encoding used whenever data is hashed or signed. Its JSON form is not byte-deterministic. Both formats ban floating point numbers, for the [same reason](https://atproto.com/specs/data-model#why-no-floats).",
+      "links": [
+        {
+          "title": "Data model spec",
+          "url": "https://atproto.com/specs/data-model"
+        },
+        {
+          "title": "Cryptography spec",
+          "url": "https://atproto.com/specs/cryptography"
+        }
+      ]
+    },
+    {
+      "page": "docs/servers-entities.html",
+      "heading": "entity-urls",
+      "summary": "atproto splits this in two. A [handle](https://atproto.com/specs/handle) is a bare DNS hostname (so a URL with a path like `example.com/user` has no equivalent), and the canonical identifier is the DID it resolves to. Tent's entity URL does both jobs, which is why changing it needs the `previous_entities` rewrite process.",
+      "links": [
+        {
+          "title": "Handle spec",
+          "url": "https://atproto.com/specs/handle"
+        },
+        {
+          "title": "DID spec",
+          "url": "https://atproto.com/specs/did"
+        }
+      ]
+    },
+    {
+      "page": "docs/servers-entities.html",
+      "heading": "discovery",
+      "summary": "This maps to handle resolution followed by DID resolution. A handle resolves to a DID through a DNS TXT record at `_atproto.<handle>` or an HTTPS `/.well-known/atproto-did` file, and the DID document lists the PDS and signing key, much like the Tent meta post. atproto also requires the DID document to point back at the handle before the handle is trusted.",
+      "links": [
+        {
+          "title": "Handle resolution",
+          "url": "https://atproto.com/specs/handle#handle-resolution"
+        },
+        {
+          "title": "DID documents",
+          "url": "https://atproto.com/specs/did#did-documents"
+        },
+        {
+          "title": "Identity guide",
+          "url": "https://atproto.com/guides/identity"
+        }
+      ]
+    },
+    {
+      "page": "docs/thinking-with-tent.html",
+      "heading": "principles",
+      "summary": "Two of these line up with atproto: the PDS is the authoritative home of a user's data, and the specs advise against bolting encryption onto existing primitives. Two differ. Apps commonly keep their own indexes in an AppView, and repositories keep no old versions of records.",
+      "links": [
+        {
+          "title": "What is missing",
+          "url": "https://atproto.com/specs/atp#what-is-missing"
+        },
+        {
+          "title": "Generic hosting",
+          "url": "https://atproto.com/articles/atproto-ethos#generic-hosting-centralized-product-development"
+        }
+      ]
+    },
+    {
+      "page": "docs/thinking-with-tent.html",
+      "heading": "microblogging",
+      "summary": "In atproto the simplest status app can't run one query against the user's own server, because a PDS only holds its own accounts' data. A Bluesky timeline comes from an AppView that indexes `app.bsky.feed.post` and follow records from the firehose, and the PDS proxies the client's request to it.",
+      "links": [
+        {
+          "title": "App views",
+          "url": "https://atproto.com/guides/the-at-stack#app-views"
+        },
+        {
+          "title": "Service proxying",
+          "url": "https://atproto.com/specs/xrpc#service-proxying"
+        }
+      ]
+    },
+    {
+      "page": "docs/thinking-with-tent.html",
+      "heading": "community-news-site",
+      "summary": "The discovery entity that republishes posts at scale is close to what an atproto AppView or feed generator does. Submissions and votes stay in each user's own repository, and the aggregator reads them from the firehose and indexes them without republishing anything.",
+      "links": [
+        {
+          "title": "Feeds guide",
+          "url": "https://atproto.com/guides/feeds"
+        },
+        {
+          "title": "App views",
+          "url": "https://atproto.com/guides/the-at-stack#app-views"
+        }
+      ]
+    },
+    {
+      "page": "docs/thinking-with-tent.html",
+      "heading": "collaborative-editing",
+      "summary": "atproto has no direct counterpart. Only a repository's owner can write its records, and records have no multi-parent version history, so collaborators would each write records in their own repos that point at the shared document with strong refs. Spaces (alpha) add shared, access-controlled contexts, but each author's records still live in their own repo.",
+      "links": [
+        {
+          "title": "Repository spec",
+          "url": "https://atproto.com/specs/repository"
+        },
+        {
+          "title": "Spaces alpha",
+          "url": "https://atproto.com/blog/atproto-spaces-alpha"
+        }
+      ]
+    },
+    {
+      "page": "docs/thinking-with-tent.html",
+      "heading": "polls-and-surveys",
+      "summary": "In atproto each respondent would write a response record in their own repository with a strong ref to the survey. Collecting answers is a backlinks query against an AppView or an index such as Constellation, where Tent asks the author's server for mentions. Responses are public unless they live in a space.",
+      "links": [
+        {
+          "title": "Backlinks",
+          "url": "https://atproto.com/guides/social-graph#backlinks"
+        }
+      ]
+    },
+    {
+      "page": "docs/uri-scheme.html",
+      "heading": "format",
+      "summary": "This maps to the `at://` URI scheme. An AT URI names the account (DID or handle) followed by a path, `at://<did>/<collection>/<rkey>`, where Tent puts resources in query parameters. The authority part is an identity that gets resolved, so a DID-based URI survives a move to a new PDS.",
+      "links": [
+        {
+          "title": "AT URI spec",
+          "url": "https://atproto.com/specs/at-uri-scheme"
+        }
+      ]
+    },
+    {
+      "page": "docs/uri-scheme.html",
+      "heading": "parameters",
+      "summary": "AT URIs have no version or attachment parameters. To pin a specific record version, atproto pairs the URI with the record's CID in a strong reference, and blobs are referenced by CID from inside records.",
+      "links": [
+        {
+          "title": "AT URI spec",
+          "url": "https://atproto.com/specs/at-uri-scheme"
+        },
+        {
+          "title": "Blob spec",
+          "url": "https://atproto.com/specs/blob"
+        }
+      ]
+    },
+    {
+      "page": "index.html",
+      "heading": "choose-your-host",
+      "summary": "A Tent host corresponds to an atproto Personal Data Server (PDS). You can sign up with a provider or run your own, and switching is [account migration](https://atproto.com/guides/account-migration): your DID stays the same, so links to you and follows of you keep working.",
+      "links": [
+        {
+          "title": "PDS",
+          "url": "https://atproto.com/guides/the-at-stack#pds"
+        },
+        {
+          "title": "Self-hosting",
+          "url": "https://atproto.com/guides/self-hosting"
+        },
+        {
+          "title": "Account migration",
+          "url": "https://atproto.com/guides/account-migration"
+        }
+      ]
+    },
+    {
+      "page": "index.html",
+      "heading": "choose-your-apps",
+      "summary": "atproto gets the same swappability from [Lexicon](https://atproto.com/guides/lexicon) schemas. Any app that reads and writes a given record type can work with the same data, so apps interoperate when they share a Lexicon, as Tent apps do when they share a post type.",
+      "links": [
+        {
+          "title": "Lexicon guide",
+          "url": "https://atproto.com/guides/lexicon"
+        },
+        {
+          "title": "Protocol extension",
+          "url": "https://atproto.com/specs/atp#protocol-extension-and-applications"
+        }
+      ]
+    },
+    {
+      "page": "index.html",
+      "heading": "control-your-life",
+      "summary": "atproto's version of this is account portability. A repository can be exported as a CAR file at any time, and with a self-held PLC rotation key you can point your DID at a new PDS even if the old one is gone. Repositories keep only the current state of each record, so long-term history is up to apps.",
+      "links": [
+        {
+          "title": "Account portability",
+          "url": "https://atproto.com/guides/overview#account-portability"
+        },
+        {
+          "title": "Account recovery",
+          "url": "https://atproto.com/guides/account-recovery"
+        },
+        {
+          "title": "Repository exports",
+          "url": "https://atproto.com/specs/sync#repository-exports"
+        }
+      ]
+    },
+    {
+      "page": "index.html",
+      "heading": "developers",
+      "summary": "As with Tent, an atproto app can talk straight to the user's server: the simplest OAuth app is static files plus a session with the user's PDS. Most social apps also run an [AppView](https://atproto.com/guides/the-at-stack#app-views) that indexes the network from the firehose, since a PDS only stores its own users' data.",
+      "links": [
+        {
+          "title": "Types of app",
+          "url": "https://atproto.com/guides/about-oauth#types-of-app"
+        },
+        {
+          "title": "App views",
+          "url": "https://atproto.com/guides/the-at-stack#app-views"
+        }
+      ]
+    },
+    {
+      "page": "index.html",
+      "heading": "service-providers",
+      "summary": "Tent providers map to PDS hosts. The difference is scope: a Tent server answers feed queries and delivers posts to subscribers, while a PDS is deliberately generic. It hosts repositories, keys and auth, and leaves app-specific indexing to AppViews.",
+      "links": [
+        {
+          "title": "Generic hosting",
+          "url": "https://atproto.com/articles/atproto-ethos#generic-hosting-centralized-product-development"
+        },
+        {
+          "title": "Account hosting spec",
+          "url": "https://atproto.com/specs/account"
+        }
+      ]
+    }
+  ]
+}

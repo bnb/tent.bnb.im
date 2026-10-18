@@ -4,4 +4,4 @@
 set -e
 cd "$(dirname "$0")/.."
 docker build --platform linux/amd64 --target build -t tent-site-build .
-exec docker run --rm -it --platform linux/amd64 -p 4567:4567 -v "$PWD/source:/site/source" tent-site-build bundle exec middleman server
+exec docker run --rm -it --platform linux/amd64 -e ATPROTO_ANNOTATIONS -p 4567:4567 -v "$PWD/source:/site/source" tent-site-build bundle exec middleman server
