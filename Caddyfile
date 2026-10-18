@@ -1,20 +1,22 @@
-www.tent.io:{$PORT} {
-  tls off
-  redir https://tent.io{uri}
+{
+	admin off
+	auto_https off
 }
 
-tent.io:{$PORT} {
-  tls off
-  root build
-  log stdout
-  tlsredirect
-  ext .html
-  gzip
+# railway terminates tls and sets PORT
+:{$PORT:8080} {
+	root * /srv
+	log
+	encode gzip
+	try_files {path} {path}.html {path}/index.html
+	file_server {
+		precompressed gzip
+	}
 
-  header / {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    X-XSS-Protection "1; mode=block"
-    X-Frame-Options "DENY"
-    X-Content-Type-Options "nosniff"
-  }
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-XSS-Protection "1; mode=block"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+	}
 }
