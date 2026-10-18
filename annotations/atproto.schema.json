@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "AT Protocol annotations",
+  "description": "Notes shown at the end of tent.io page sections when ATPROTO_ANNOTATIONS is set, pointing at the closest AT Protocol concept.",
+  "type": "object",
+  "required": ["annotations"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["page", "heading", "summary", "links"],
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "description": "Built page path, as Middleman's current_page.path reports it, e.g. docs/posts.html",
+            "type": "string",
+            "pattern": "^[a-z0-9/-]+\\.html$"
+          },
+          "heading": {
+            "description": "id of the heading whose section the note closes",
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "description": "Markdown. How the Tent concept maps to AT Protocol, differences included",
+            "type": "string",
+            "minLength": 1
+          },
+          "links": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["title", "url"],
+              "additionalProperties": false,
+              "properties": {
+                "title": { "type": "string", "minLength": 1 },
+                "url": {
+                  "description": "Official AT Protocol docs, or Bluesky's developer docs for Bluesky record types",
+                  "type": "string",
+                  "pattern": "^https://(atproto\\.com|docs\\.bsky\\.app)/"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

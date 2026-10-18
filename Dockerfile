@@ -11,7 +11,10 @@ WORKDIR /site
 COPY Gemfile Gemfile.lock ./
 RUN bundle _1.17.3_ install --jobs 4
 COPY . .
-RUN bundle exec middleman build
+# set on the railway service to build with the annotations shown
+ARG ATPROTO_ANNOTATIONS
+# --verbose so a page that fails to render prints its exception
+RUN bundle exec middleman build --verbose
 
 FROM caddy:2-alpine
 COPY Caddyfile /etc/caddy/Caddyfile

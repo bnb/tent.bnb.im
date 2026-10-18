@@ -3,6 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'tilt/tent_doc'
 require 'markdown_html'
+require 'atproto_annotations'
 require 'builder'
 
 begin
@@ -31,6 +32,10 @@ set :markdown_engine, :redcarpet
 set :markdown, REDCARPET_EXTENTIONS
 
 helpers do
+  def atproto_annotate(html)
+    AtprotoAnnotations.apply(html, current_page.path)
+  end
+
   def nav_link_with_active(text, target, attributes = {})
     target_path = target
     item_path = current_page.url.sub(/([^\/]+)\/\Z/, '\1')

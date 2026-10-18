@@ -18,7 +18,7 @@
               <h1><%= current_page.data[:title] %></h1>
             </header>
 
-            <%= yield %>
+            <%= atproto_annotate(yield) %>
           </article>
         </div>
       </div>
