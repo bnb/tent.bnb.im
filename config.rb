@@ -36,8 +36,9 @@ helpers do
     AtprotoAnnotations.apply(html, current_page.path)
   end
 
-  def atproto_body_class
-    AtprotoAnnotations.body_class(current_page.path)
+  def atproto_toggle
+    toggle = AtprotoAnnotations.toggle(current_page.path)
+    toggle && toggle + javascript_include_tag('atproto-notes', defer: true)
   end
 
   def nav_link_with_active(text, target, attributes = {})
