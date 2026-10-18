@@ -4,10 +4,13 @@ require 'json-schema'
 require 'redcarpet'
 require 'uri'
 
-# Cards beside heading sections that point at the closest AT Protocol concept.
-# Off unless ATPROTO_ANNOTATIONS is 1 or true, read when the site builds.
+# Cards that point at the closest AT Protocol concept, placed beside heading
+# sections without moving the original text. Built only when
+# ATPROTO_ANNOTATIONS is 1 or true; readers then turn them on with a switch in
+# the page corner (source/javascripts/atproto-notes.js).
 module AtprotoAnnotations
   DIR = File.expand_path('../../annotations', __FILE__)
+  STORAGE_KEY = 'tent-atproto-notes'.freeze
 
   # the tag each "read more" link gets, from the first segment of its path
   LINK_KINDS = { 'specs' => 'Spec', 'guides' => 'Guide', 'blog' => 'Blog', 'articles' => 'Article' }.freeze
@@ -21,12 +24,8 @@ module AtprotoAnnotations
     %w[1 true].include?(ENV['ATPROTO_ANNOTATIONS'].to_s.downcase)
   end
 
-  # every page widens when annotations are on, so the header doesn't jump
-  # between pages with and without cards
-  def self.body_class(page)
-    return unless enabled?
-
-    by_page.key?(page) ? 'atproto-annotations atproto-annotated' : 'atproto-annotations'
+  def self.page?(page)
+    enabled? && by_page.key?(page)
   end
 
   def self.by_page
@@ -46,19 +45,27 @@ module AtprotoAnnotations
       match = out.match(heading)
       raise "atproto annotation for #{page} has no ##{note['heading']} heading" unless match
 
-      # a section runs from its heading to the next one; the card sits beside it
-      section_end = out.index(/<h[1-6][ >]/, match.end(0)) || out.length
-      section = out[match.begin(0)...section_end]
-      out[0...match.begin(0)] + render(note, section) + out[section_end..-1]
+      # right after the heading; both elements are positioned out of the flow
+      out.dup.insert(match.end(0), render(note))
     end
   end
 
-  def self.render(note, section)
+  # the switch, plus the saved choice applied before the page paints so the
+  # cards don't flash on or off
+  def self.toggle(page)
+    return unless page?(page)
+
     <<-HTML
-<div class="atproto-row">
-<div class="atproto-row-text">
-#{section}</div>
-<aside class="atproto-card" aria-label="AT Protocol note">
+<script>try{if(localStorage.getItem('#{STORAGE_KEY}')==='on')document.documentElement.className+=' atproto-on'}catch(e){}</script>
+<button type="button" class="atproto-toggle" role="switch" aria-checked="false" hidden><span class="atproto-toggle-track" aria-hidden="true"><span class="atproto-toggle-knob"></span></span>AT Protocol notes</button>
+    HTML
+  end
+
+  def self.render(note)
+    id = "atproto-note-#{note['heading']}"
+    <<-HTML
+<button type="button" class="atproto-marker" aria-expanded="false" aria-controls="#{id}" aria-label="AT Protocol note: #{h note['atproto']}">at://</button>
+<aside class="atproto-card" id="#{id}" data-heading="#{h note['heading']}" aria-label="AT Protocol note">
 <div class="atproto-card-inner">
 <span class="atproto-card-mark" aria-hidden="true">at://</span>
 <div class="atproto-card-body">
@@ -71,7 +78,6 @@ module AtprotoAnnotations
 </nav>
 </div>
 </aside>
-</div>
     HTML
   end
 
