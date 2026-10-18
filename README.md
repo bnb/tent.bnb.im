@@ -2,12 +2,18 @@
 
 This repository hosts the Tent blog and documentation. Take a look at [the other repositories](https://github.com/tent) for Tent server and client implementations.
 
-## Build
+The site is built with Middleman 3.1, which only runs on old Ruby, so everything goes through Docker.
 
-Compile:
+## Scripts
 
-    bundle exec middleman build
+Dev (live-reloading preview at http://localhost:4567):
 
-Preview:
+    bin/dev
 
-    bundle exec middleman server
+Check (builds the site and the production image):
+
+    docker build --platform linux/amd64 .
+
+Deploy to Railway (the Dockerfile builds the site and serves it with Caddy on `$PORT`):
+
+    railway up
