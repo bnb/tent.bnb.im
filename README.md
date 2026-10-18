@@ -14,6 +14,6 @@ Check (builds the site and the production image):
 
     docker build --platform linux/amd64 .
 
-Deploy to Railway (the Dockerfile builds the site and serves it with Caddy on `$PORT`):
+Deploy to Railway (the Dockerfile builds the site and serves it with Caddy on `$PORT`). Link the checkout once with `railway link --project tent.bnb.im --service tent`, since an unlinked `railway up` creates a new project:
 
     railway up
