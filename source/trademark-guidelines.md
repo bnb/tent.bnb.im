@@ -70,7 +70,11 @@ Thank you for your help and support of Tent.
 - Before naming your product, service, or company.
 - When in doubt.
 
-### [Download logo](https://s3.amazonaws.com/tent-media/tent-logos.zip)
+### [Download logo](https://web.archive.org/web/20161002053132id_/https://s3.amazonaws.com/tent-media/tent-logos.zip)
+
+<p class="archive-note" role="note">
+  <strong>Archive note:</strong> the original logo download is no longer online, so this archival copy links to the one saved by the <a href="https://web.archive.org/">Wayback Machine</a>.
+</p>
 
 ## Legal
 
