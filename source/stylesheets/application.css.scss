@@ -26,6 +26,19 @@ footer {
   }
 }
 
+.archive-notice {
+  padding: 8px 16px;
+  background-color: darken($blue-color, 15%);
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+
+  a {
+    color: #fff;
+    text-decoration: underline;
+  }
+}
+
 .navbar-logo {
   height: 50px;
   margin-top: -10px;
