@@ -36,6 +36,10 @@ helpers do
     AtprotoAnnotations.apply(html, current_page.path)
   end
 
+  def atproto_body_class
+    AtprotoAnnotations.body_class(current_page.path)
+  end
+
   def nav_link_with_active(text, target, attributes = {})
     target_path = target
     item_path = current_page.url.sub(/([^\/]+)\/\Z/, '\1')

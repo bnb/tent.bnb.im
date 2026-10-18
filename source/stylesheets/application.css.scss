@@ -254,3 +254,260 @@ article {
   display: block;
   margin: 0 auto;
 }
+
+// AT Protocol annotation cards, rendered by lib/atproto_annotations.rb
+
+$atproto-accent: #a34a0b;
+$atproto-tint: mix($atproto-accent, #fff, 10%);
+$atproto-line: mix($atproto-accent, #fff, 30%);
+$atproto-mark: mix($atproto-accent, #fff, 5.5%);
+$atproto-wash: mix($atproto-accent, #fff, 3%);
+$atproto-tent-tint: mix($blue-color, #fff, 10%);
+$atproto-tent-text: darken($blue-color, 25%);
+$atproto-rail: 320px;
+$atproto-gap: 48px;
+
+.atproto-card {
+  position: relative;
+  max-width: 560px;
+  margin: 16px 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.atproto-card-inner {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid $atproto-line;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 18px rgba(60, 40, 20, 0.06);
+}
+
+.atproto-card-mark {
+  position: absolute;
+  top: 6px;
+  right: 2px;
+  font-family: $font-family-monospace;
+  font-weight: bold;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: $atproto-mark;
+  transform: rotate(-14deg);
+  transform-origin: 100% 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.atproto-card-body {
+  position: relative;
+  padding: 16px 18px 14px;
+  color: #4d4d4d;
+
+  p {
+    margin: 0 0 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.atproto-card-body .atproto-card-map {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.atproto-chip-tent,
+.atproto-chip-atproto {
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.atproto-chip-tent {
+  background: $atproto-tent-tint;
+  color: $atproto-tent-text;
+}
+
+.atproto-chip-atproto {
+  background: $atproto-tint;
+  color: $atproto-accent;
+}
+
+.atproto-card-arrow path,
+.atproto-link-external path {
+  fill: none;
+  stroke: #8a8a8a;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.atproto-card-links {
+  position: relative;
+  padding: 8px 10px;
+  border-top: 1px solid $atproto-line;
+  background: $atproto-wash;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+      background: mix($blue-color, #fff, 6%);
+      text-decoration: none;
+
+      .atproto-link-title {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.atproto-card-links-label {
+  margin: 0 0 2px 8px;
+  font-size: 11.5px;
+  font-weight: bold;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #6f6f6f;
+}
+
+.atproto-link-kind {
+  flex: 0 0 auto;
+  min-width: 54px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #595959;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.atproto-link-kind-spec {
+  background: $atproto-tint;
+  color: $atproto-accent;
+}
+
+.atproto-link-kind-guide {
+  background: $atproto-tent-tint;
+  color: $atproto-tent-text;
+}
+
+.atproto-link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.atproto-link-title {
+  font-size: 14.5px;
+  font-weight: bold;
+}
+
+.atproto-link-url {
+  overflow: hidden;
+  font-family: $font-family-monospace;
+  font-size: 12px;
+  color: #6f6f6f;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.atproto-link-external {
+  flex: 0 0 auto;
+}
+
+// beside the text from 1200px; narrower screens keep each card under its section
+@media (min-width: 1200px) {
+  .atproto-annotations .container {
+    width: auto;
+    max-width: 1360px;
+  }
+
+  .atproto-annotated {
+    .docs-nav {
+      width: 20%;
+      margin-left: 0;
+    }
+
+    .docs-content {
+      width: 80%;
+    }
+
+    .page-content {
+      width: 75%;
+      margin-left: 12.5%;
+    }
+
+    // the cards hang in this padding, so text keeps one width whether or not
+    // its section has a card
+    .docs-content,
+    .page-content {
+      padding-right: $atproto-rail + $atproto-gap + 15px;
+    }
+  }
+
+  .atproto-row {
+    display: flex;
+    align-items: flex-start;
+    margin-right: -($atproto-rail + $atproto-gap);
+  }
+
+  .atproto-row-text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .atproto-card {
+    flex: 0 0 $atproto-rail;
+    // a long link address would otherwise widen the card past the rail
+    min-width: 0;
+    max-width: none;
+    margin: 20px 0 0 $atproto-gap;
+
+    // dot and dashed line joining the card to its heading
+    &:before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: -38px;
+      width: 32px;
+      border-top: 2px dashed $atproto-line;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 21px;
+      left: -44px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: $atproto-accent;
+    }
+  }
+}
